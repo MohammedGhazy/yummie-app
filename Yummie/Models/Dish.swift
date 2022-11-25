@@ -6,7 +6,12 @@
 //
 
 import Foundation
-struct Dish {
-    var id,name,image,desc:String?
-    var calories: Int?
+struct Dish: Decodable {
+    
+    let id, name, description, image: String?
+    let calories: Int?
+    
+    var formattedCalories: String {
+        return "\(calories ?? 0) calories"
+    }
 }

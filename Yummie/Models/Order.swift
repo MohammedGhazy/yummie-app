@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct Order: Decodable {
+    var id: String?
+    var name: String?
+    var dish:Dish?
+}

@@ -9,21 +9,45 @@ import UIKit
 
 class OrdersListVC: UIViewController {
 
+    @IBOutlet weak var tableView: UITableView!
+    
+    var oredersArray: [Order] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        title = "Orders"
+        tableView.register(UINib(nibName: "DishListCell", bundle: nil), forCellReuseIdentifier: Constants.allDishesReuseIdentefier)
+        
+        ProgressHUD.show()
+        NetworkService.shared.fetchOrders {[weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let orders):
+                ProgressHUD.dismiss()
+                self.oredersArray = orders
+                self.tableView.reloadData()
+            case .failure(let error):
+                ProgressHUD.showError(error.localizedDescription)
+            }
+        }
+    }
+}
+
+extension OrdersListVC: UITableViewDelegate,UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return oredersArray.count
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.allDishesReuseIdentefier, for: indexPath) as! DishListCell
+        cell.setup(order: oredersArray[indexPath.row])
+        return cell
     }
-    */
-
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let controller = DetailVC.instantiate()
+        controller.dish = oredersArray[indexPath.row].dish
+        navigationController?.pushViewController(controller, animated: true)
+    }
 }

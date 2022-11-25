@@ -6,24 +6,43 @@
 //
 
 import UIKit
+import Kingfisher
 
 class DetailVC: UIViewController {
-
+    
+    @IBOutlet weak var detailImageView: UIImageView!
+    @IBOutlet weak var dishNameLabel: UILabel!
+    @IBOutlet weak var caloriesLabel: UILabel!
+    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var nameTextField: UITextField!
+    var dish: Dish!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        populateView()
+    }
+    private func populateView() {
+        detailImageView.kf.setImage(with: dish.image?.asURL)
+        dishNameLabel.text = dish.name
+        caloriesLabel.text = String(describing: "\(dish.calories!) calories")
+        descriptionLabel.text = dish.description
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    @IBAction func placeOrderBtnPress(_ sender: UIButton) {
+        guard let name = nameTextField.text?.trimmingCharacters(in: .whitespaces) , !name.isEmpty else {
+            ProgressHUD.showError("Please Enter Your Name")
+            return
+        }
+        ProgressHUD.show("Your Order In Progress")
+        NetworkService.shared.placeOrder(dishId: dish.id ?? "", name: name) {[weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(_):
+                ProgressHUD.showSuccess("your Order Recieved")
+            case .failure(let error):
+                ProgressHUD.showError(error.localizedDescription)
+            }
+        }
     }
-    */
-
 }
